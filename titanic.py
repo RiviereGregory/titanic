@@ -5,6 +5,7 @@ Created on Sun Dec  1 19:17:05 2019
 @author: Greg13
 """
 import pandas as pd
+import numpy as np
 import statistics as stat
 import matplotlib.pyplot as plt
 from sklearn.model_selection import cross_val_score
@@ -107,6 +108,52 @@ def parse_model_2bis(X):
 X, y = parse_model_2bis(train.copy())
 lr = LogisticRegression()
 compute_score(lr, X, y) #0.800274134181057
+
+lr.fit(X,y)
+print(lr.coef_) 
+#     Age         SibSp        Parch      Fare         Pclass1     Pclass2   Pclass3     Female      Male        enfant
+# [[-0.02230836 -0.42181314 -0.19815951  0.004332    1.06824222  0.1841089 -0.8252507   1.59541268 -1.16831225  1.72150237]]
+# is_child est descriminant car poid + important
+
+
+# Random Forest
+from sklearn.ensemble import RandomForestClassifier
+
+X, y = parse_model_2(train.copy())
+fr = RandomForestClassifier()
+compute_score(fr, X, y) # 0.8070154235053925
+
+
+def clf_importance(X, clf):
+    import pylab as pl
+    importances = clf.feature_importances_
+    indices = np.argsort(importances)[::-1]
+    pl.title('Feature importance')
+    for tree in clf.estimators_:
+        pl.plot(range(X.shape[1]), tree.feature_importances_[indices], 'r')
+        pl.plot(range(X.shape[1]), importances[indices], 'b')
+        pl.show()
+    for f in range(X.shape[1]):
+        print('%d. feature : %s (%f)' % (f + 1, X.columns[indices[f]] , importances[indices[f]]))
+
+rf = RandomForestClassifier()
+rf.fit(X, y)
+clf_importance(X, rf)
+
+#1. feature : Age (0.257123)
+#2. feature : Fare (0.257019)
+#3. feature : split_Sex_male (0.239873)
+#4. feature : split_Sex_female (0.065598)
+#5. feature : split_Pclass_3 (0.051683)
+#6. feature : Parch (0.043072)
+#7. feature : SibSp (0.042366)
+#8. feature : split_Pclass_1 (0.024831)
+#9. feature : split_Pclass_2 (0.018435)
+        
+
+
+
+
 
 
 
