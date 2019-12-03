@@ -150,10 +150,32 @@ clf_importance(X, rf)
 #8. feature : split_Pclass_1 (0.024831)
 #9. feature : split_Pclass_2 (0.018435)
         
+# Utilisation des autres variable (Name)
+X = train.copy()
+X['title'] = X.Name.map(lambda x : x.split(',')[1].split('.')[0])
+X['surname'] = X.Name.map(lambda x : '(' in x)
 
+# Ajout name et cabin
+def parse_model_4(X):
+    target = X.Survived
+    X['title'] = X.Name.map(lambda x : x.split(',')[1].split('.')[0])
+    X['surname'] = X.Name.map(lambda x : '(' in x)
+    X['Cabin'] = X.Cabin.map(lambda x : x[0] if not pd.isnull(x) else -1)
+    to_dummy = ['Pclass', 'Sex', 'title', 'Embarked', 'Cabin']
+    for dum in to_dummy :
+        split_feature = pd.get_dummies(X[dum], prefix='split_'+dum)
+        X = X.join(split_feature)
+        del X[dum]
+    X['Age'] = X.Age.fillna(X.Age.median())
+    X['is_child'] = X.Age < 8
+    to_del = ['Name', 'Survived', 'Ticket']
+    for col in to_del : del X[col]
+    return  X, target
 
+X, y = parse_model_4(train.copy())
+lr = LogisticRegression()
+compute_score(lr, X, y) #0.8238448861562948
 
-
-
-
+lr.fit(X,y)
+print(lr.coef_) 
 
